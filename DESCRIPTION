@@ -1,0 +1,12 @@
+Package: surrogateMutation
+Type: Package
+Title: Surrogate Mutations in Cancer Cells and Patients
+Version: 0.1
+Date: 2015-03-06
+Author: Ted Laderas
+Maintainer: Ted Laderas <laderast@ohsu.edus>
+Description: Integrates copy number and mutation information on network to find network aggregated versions of oncogenes, called surrogate oncogenes.
+License: Artistic License
+Depends: R (>= 3.0.0), igraph, graph, BioNet, DLBCL, Rgraphviz, utils
+Suggests: foreach, doMC, knitr
+VignetteBuilder: knitr
