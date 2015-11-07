@@ -1,3 +1,12 @@
+#' Given Copy Number Results, annotate with GISTIC files
+#'
+#' @param mutCopyFrames 
+#' @param gisticNodeMapped 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 annotateCopyResultsWithGistic <-
 function(mutCopyFrames, gisticNodeMapped){
   for(sampleName in names(mutCopyFrames)){
