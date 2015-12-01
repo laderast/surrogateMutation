@@ -81,3 +81,125 @@ function(NodeName, sampleName, GeneName, intome=intome,
   dev.off()
   }  
 }
+
+summarizeNetworks <- function(IDvec, intome, mutCopyFrames, surrogateTable, geneIntTable, fileOut="www/netgraph.svg", filterNodes=NULL){
+  #library(gplots)
+  if(length(IDvec) < 1){return(NULL)}
+  
+  nodeTable <- surrogateTable[surrogateTable$ID %in% IDvec,]
+  
+  fullNet <- NULL
+  surrNodes <- unique(as.character(nodeTable$NodeName))
+  #for each row of the table, grab neighbors of the surrogate node
+  for(i in 1:nrow(nodeTable)){
+    Sample <- nodeTable[i,"Sample"]
+    NodeName <- as.character(nodeTable[i,"NodeName"])
+    nodenet <- c(NodeName,intersect(as.character(inEdges(NodeName, intome)[[1]]), 
+                                    as.character(mutCopyFrames[[Sample]]$NodeName)))
+    fullNet <- c(fullNet, nodenet)
+  }
+  
+  #count the number of times a node is mutated
+  fullNet <- table(fullNet)
+  
+  if(!is.null(filterNodes)){
+    fullNet <- fullNet[fullNet > filterNodes]
+  }
+  
+  surrNodeCount <- table(as.character(nodeTable$NodeName)) +1
+  
+  #subtract 1 from the count for the surrogate nodes, since we already count them
+  fullNet[names(surrNodeCount)] <- fullNet[names(surrNodeCount)] - surrNodeCount 
+  
+  #don't graph if the network only has 1 node or less  
+  if(sum(fullNet) < 2 | length(fullNet) < 2){return(NULL)}
+  
+  numColors <- max(fullNet) + 1
+  #colorPanel <- topo.colors(numColors)
+  colorPanel <- colorpanel(n=numColors, low="white", high="steelblue")
+  
+  #assign colors according to degres
+  nodeColorList <- list()
+  for(nd in names(fullNet)){
+    nodeColorList[[nd]] <- colorPanel[fullNet[nd]]
+  }
+  
+  #extract the relevant subgraph from the interactome
+  fullGraph <- subGraph(names(fullNet), intome)
+  
+  labeltab <- geneIntTable[geneIntTable$NodeName %in% names(fullNet),]
+  labels <- as.character(labeltab$Gene)
+  names(labels) <- labeltab$NodeName
+  
+  #print(labels)
+  
+  #default node render properties
+  nodeRenderInfo(fullGraph) <- list(shape="circle", 
+                                    iheight=.5, iwidth= .5, 
+                                    fixedsize=FALSE, label = as.list(labels))
+  #inRPPA <- nodenet[nodenet %in% RPPANodes]
+  
+  #make surrogate node proteins a diamond
+  shapeList <- list()
+  for(surr in surrNodes){
+    shapeList[[surr]] <- "diamond"  
+  }
+  #for(RP in inRPPA){RPPAshape[[RP]] <- "diamond"}
+  nodeRenderInfo(fullGraph) <- list(shape=shapeList)
+  
+  #color each node by degree of mutation
+  fullGraph <- layoutGraph(fullGraph, layoutType="fdp")
+  
+  nodeRenderInfo(fullGraph) <- list(fill = nodeColorList)
+  if(!is.null(fileOut)){
+    svg(height=7, width=7, filename = fileOut)
+    renderGraph(fullGraph)
+    #title("Summary Network")
+    dev.off()
+  }
+  else{renderGraph(fullGraph)
+  }
+  return(fullNet)
+}
+
+getSubnetworkForSamples <- function(surrogateNode, intome, surrResult, sampList=NULL){
+  require(graph)
+  
+  intomeNodes <- inEdges(surrogateNode, intome)[[1]]
+  intomeNodes <- c(surrogateNode, intomeNodes)
+  
+  mutCopyFrames <- surrResult$mutCopyFrames
+  
+  if(!is.null(sampList)){
+    mutCopyFrames <- mutCopyFrames[[sampList]]
+  }
+  
+  allMutList <- lapply(mutCopyFrames, function(x){as.character(x$NodeName)})
+  
+  allMuts <- Reduce(union, allMutList)
+  #print(allMuts)
+  
+  allMutCount <- rep(0, length(allMuts))
+  names(allMutCount) <- allMuts
+  #need function for counting mutations here
+  countMuts <- lapply(allMutList, function(x){allMutCount[x] <- allMutCount[x] +1 
+                                              return(allMutCount)})
+  allMutCount <- Reduce("+", countMuts)
+  
+  print(allMutCount)
+  
+  inBoth <- intersect(intomeNodes,allMuts)
+  if(!surrogateNode %in% inBoth){
+  inBoth <- c(inBoth, surrogateNode)}
+  allMutCount <- allMutCount[inBoth]
+  
+  subNet <- subGraph(inBoth, intome)
+  nodeDataDefaults(subNet, "counts") <- 0 
+    
+  nodeData(subNet, attr="counts") <- allMutCount
+  
+  nodeNames <- unlist(lapply(nodes(subNet), function(x){strsplit(x, "\\(")[[1]][1]}))
+  nodes(subNet) <- nodeNames
+  
+  return(subNet)
+}
