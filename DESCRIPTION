@@ -7,6 +7,6 @@ Author: Ted Laderas
 Maintainer: Ted Laderas <laderast@ohsu.edus>
 Description: Integrates copy number and mutation information on network to find network aggregated versions of oncogenes, called surrogate oncogenes.
 License: Artistic License
-Depends: R (>= 3.0.0), igraph, graph, BioNet, DLBCL, Rgraphviz, utils
-Suggests: foreach, doMC, knitr
+Depends: R (>= 3.0.0), igraph, graph, BioNet, Rgraphviz, utils, gplots
+Suggests: foreach, doMC, knitr, DLBCL
 VignetteBuilder: knitr

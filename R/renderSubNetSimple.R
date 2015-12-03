@@ -83,7 +83,7 @@ function(NodeName, sampleName, GeneName, intome=intome,
 }
 
 summarizeNetworks <- function(IDvec, intome, mutCopyFrames, surrogateTable, geneIntTable, fileOut="www/netgraph.svg", filterNodes=NULL){
-  #library(gplots)
+  require(gplots)
   if(length(IDvec) < 1){return(NULL)}
   
   nodeTable <- surrogateTable[surrogateTable$ID %in% IDvec,]
@@ -159,7 +159,7 @@ summarizeNetworks <- function(IDvec, intome, mutCopyFrames, surrogateTable, gene
   }
   else{renderGraph(fullGraph)
   }
-  return(fullNet)
+  return(list(graph=fullGraph,nodeCounts=fullNet))
 }
 
 getSubnetworkForSamples <- function(surrogateNode, intome, surrResult, sampList=NULL){
