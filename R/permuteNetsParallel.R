@@ -3,10 +3,10 @@ function(sampleSize, numPermutes=10000, intAdjmat=intAdjmat, cellLine="",
                                 cores = 4, prefix="", fileout=paste(prefix,cellLine, "permute-test-", 
                                                          sampleSize, ".txt", sep="")){
   
-  library(utils)
-  library(foreach)
+  require(utils)
+  require(foreach)
   #library(iterators)
-  library(doMC)
+  require(doMC)
   registerDoMC(cores=cores)
   
   perms <- iter(1:numPermutes)
@@ -31,10 +31,6 @@ function(sampleSize, numPermutes=10000, intAdjmat=intAdjmat, cellLine="",
   distribution1 <- rep(1,length(rownames(intAdjmat)))
   distribution1 <- distribution1/length(rownames(intAdjmat))
   names(distribution1) <- rownames(intAdjmat)
-  
-
-
-  
   
   intNames <- rownames(intAdjmat)
   
@@ -80,7 +76,6 @@ function(sampleSize, numPermutes=10000, intAdjmat=intAdjmat, cellLine="",
     #distribution1res[i,] <- mutcounts
     
   }
-
   
   #colnames(distribution1res) <- RPPANodes
   write.table(distribution1res, fileout, quote=F, sep="\t", row.names=F)

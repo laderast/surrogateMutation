@@ -1,6 +1,6 @@
 plotAllGraphs <-
 function(surrogateTable, surrogateResults, intome) {
-  source("~/Code/surrogate/plot-results.R")
+  #source("~/Code/surrogate/plot-results.R")
   for(i in 1:nrow(surrogateTable)){
     NodeName <- as.character(surrogateTable[i,"NodeName"])
     Sample <- as.character(surrogateTable[i,"Sample"])

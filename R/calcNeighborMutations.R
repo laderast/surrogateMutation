@@ -3,9 +3,9 @@ function(intome, nodeset=NULL, gisticCopyCalls,
                                   nodeMappedDream, Samples=NULL, cores=NULL, 
 				  prefix="", numPermutes=10000, geneIntTable=geneIntTable){
   
-  if(!is.null(Samples)){
-    cellLines <- Samples
-  }
+  #if(!is.null(Samples)){
+   # cellLines <- Samples
+  #}
   
   #for permutation script, look at venus-permutation-script.R
   intNames <- nodes(intome)
@@ -36,14 +36,16 @@ function(intome, nodeset=NULL, gisticCopyCalls,
 
   cls <- intersect(colnames(gisticCopyCalls), as.character(as.character(unique(nodeMappedDream$Sample))))
   
-  if(!is.null(cellLines)){cellLines <- intersect(cls, cellLines)}
-  else {cellLines <- cls}
+  if(!is.null(Samples)){Samples <- intersect(cls, Samples)}
+  else {Samples <- cls}
+  
+  print(Samples)
   
   cellResults <- list()
   distMatrices <- list()
   mutCopyFrames <- list()
 
-  for(cell in cellLines){
+  for(cell in Samples){
     print(cell)
   
   #cell <- "UACC812"
@@ -55,7 +57,7 @@ function(intome, nodeset=NULL, gisticCopyCalls,
     cellCopyCalls <- rep(1, length(cellCalls))
     names(cellCopyCalls) <- names(cellCalls)
   
-    cellMutCalls <- table(as.character(nodeMappedDream[nodeMappedDream$CellLine == cell, "NodeName"]))
+    cellMutCalls <- table(as.character(nodeMappedDream[nodeMappedDream$Sample == cell, "NodeName"]))
     cellMutCalls[na.omit(names(cellMutCalls))]
   
     #build a vector with all mutations and copy calls
